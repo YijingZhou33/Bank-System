@@ -239,19 +239,14 @@ def test_login_9(monkeypatch, capsys):
         assert captured.out == "\nInvalid password, please try again.\n"
 
 
-
-"""
-TODO: Test Suite 4, see PROJ
-"""
-
-
 #----------------------------------------------------------------
 #
 #  Test Suite 4: FR-4: Customer Dashboard
 #
+#       username = test
 #----------------------------------------------------------------
 
-# expired_loan = 0
+# TC01: option = 1, overdue_loans = 0
 def test_client_1(monkeypatch, capsys):
     inputs = iter(["1", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -265,7 +260,7 @@ def test_client_1(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "deposit(username)" in captured.out)
 
-# expired_loan = 0
+# TC02: option = 2, overdue_loans = 0
 def test_client_2(monkeypatch, capsys):
     inputs = iter(["2", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -279,7 +274,7 @@ def test_client_2(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "withdraw(username, balance)" in captured.out)
 
-# expired_loan = 0
+# TC03: option = 3, overdue_loans = 0
 def test_client_3(monkeypatch, capsys):
     inputs = iter(["3", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -293,7 +288,7 @@ def test_client_3(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "createLoan(username, timestamp)" in captured.out)
 
-# expired_loan = 0
+# TC04: option = 4, overdue_loans = 0
 def test_client_4(monkeypatch, capsys):
     inputs = iter(["4", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -307,7 +302,7 @@ def test_client_4(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "payLoan(username, balance)" in captured.out)
 
-# expired_loan = 0
+# TC05: option = 5, overdue_loans = 0
 def test_client_5(monkeypatch, capsys):
     inputs = iter(["5", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -321,7 +316,7 @@ def test_client_5(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "pass1Month()" in captured.out)
 
-# expired_loan = 0
+# TC06: option = 6, overdue_loans = 0
 def test_client_6(monkeypatch, capsys):
     inputs = iter(["6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -334,7 +329,7 @@ def test_client_6(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert a == None
 
-# expired_loan = 0
+# TC07: option = 123, overdue_loans = 0
 def test_client_7(monkeypatch, capsys):
     inputs = iter(["123", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -347,7 +342,7 @@ def test_client_7(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "Invalid option, please try again." in captured.out)
 
-# expired_loan = 0
+# TC08: option = "", overdue_loans = 0
 def test_client_8(monkeypatch, capsys):
     inputs = iter(["", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -360,8 +355,7 @@ def test_client_8(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "Invalid option, please try again." in captured.out)
 
-# expired_loan = 0
-# len(exist_loans) = 3
+# TC09: option = 3, existing_loans = 3, overdue_loans = 0
 def test_client_9(monkeypatch, capsys):
     inputs = iter(["3", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -375,7 +369,7 @@ def test_client_9(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "You have already reached limitation of total loan amount (3)." in captured.out)
 
-# expired_loan = 1
+# TC10: option = 3, existing_loans = 1, overdue_loans = 1
 def test_client_10(monkeypatch, capsys):
     inputs = iter(["3", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -389,8 +383,7 @@ def test_client_10(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." in captured.out and "You have loan(s) overdue." in captured.out)
 
-# expired_loan = 0
-# len(exist_loans) = 0
+# TC11: option = 4, existing_loans = 0
 def test_client_11(monkeypatch, capsys):
     inputs = iter(["4", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -404,9 +397,7 @@ def test_client_11(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "You don't have any loan." in captured.out)
 
-# expired_loan = 0
-# len(exist_loans) = 1
-# balance = 0
+# TC12: option = 4, balance = 0, existing_loans = 1, overdue_loans = 0
 def test_client_12(monkeypatch, capsys):
     inputs = iter(["4", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -419,6 +410,7 @@ def test_client_12(monkeypatch, capsys):
         client("test")
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "Your balance is 0, please make a deposit first!" in captured.out)
+
 
 #----------------------------------------------------------------
 #
@@ -728,7 +720,7 @@ def test_createLoan_8(monkeypatch, capsys):
 #       username = test 
 #----------------------------------------------------------------
 
-# TC01: existing_loan = 0, balance = 1000, repayment = 1000
+# TC01: existing_loans = 0, balance = 1000, repayment = 1000
 def test_payLoan_1(monkeypatch, capsys):
     with patch('main_test.c') as mocksql:
         mocksql.execute().fetchall.return_value = []
@@ -736,7 +728,7 @@ def test_payLoan_1(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "You don't have any loan." in captured.out
 
-# TC02: existing_loan = 1, balance = 0, repayment = 1000
+# TC02: existing_loans = 1, balance = 0, repayment = 1000
 def test_payLoan_2(monkeypatch, capsys):
     with patch('main_test.c') as mocksql:
         mocksql.execute().fetchall.return_value = [["1", 100000, 110000, 63, 75]]
@@ -744,7 +736,7 @@ def test_payLoan_2(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Your balance is 0, please make a deposit first!" in captured.out
 
-# TC03: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC03: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 2, repayment = None
 def test_payLoan_3(monkeypatch, capsys):
     inputs = iter(["2"])
@@ -755,7 +747,7 @@ def test_payLoan_3(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Invalid option, please try again." in captured.out
 
-# TC04: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC04: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = "", repayment = None
 def test_payLoan_4(monkeypatch, capsys):
     inputs = iter(['""'])
@@ -766,7 +758,7 @@ def test_payLoan_4(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Invalid option, please try again." in captured.out
 
-# TC05: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC05: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = 0
 def test_payLoan_5(monkeypatch, capsys):
     inputs = iter(["1", "0"])
@@ -777,7 +769,7 @@ def test_payLoan_5(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Repayment failed: invalid input, please try again." in captured.out
 
-# TC06: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC06: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = 0.01
 def test_payLoan_6(monkeypatch, capsys):
     inputs = iter(["1", "0.01"])
@@ -790,7 +782,7 @@ def test_payLoan_6(monkeypatch, capsys):
             captured = capsys.readouterr()
             assert "Your repayment has been successfully processed!" in captured.out
 
-# TC07: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC07: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = 999.99
 def test_payLoan_7(monkeypatch, capsys):
     inputs = iter(["1", "999.99"])
@@ -803,7 +795,7 @@ def test_payLoan_7(monkeypatch, capsys):
             captured = capsys.readouterr()
             assert "Your repayment has been successfully processed!" in captured.out
 
-# TC08: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC08: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = 1000
 def test_payLoan_8(monkeypatch, capsys):
     inputs = iter(["1", "1000"])
@@ -816,7 +808,7 @@ def test_payLoan_8(monkeypatch, capsys):
             captured = capsys.readouterr()
             assert "Your repayment has been successfully processed!" in captured.out
 
-# TC09: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC09: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = 1000.01
 def test_payLoan_9(monkeypatch, capsys):
     inputs = iter(["1", "1000.01"])
@@ -827,7 +819,7 @@ def test_payLoan_9(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Repayment failed: invalid input, please try again." in captured.out
 
-# TC10: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC10: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = 2.333
 def test_payLoan_10(monkeypatch, capsys):
     inputs = iter(["1", "2.333"])
@@ -838,7 +830,7 @@ def test_payLoan_10(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Repayment failed: invalid input, please try again." in captured.out
 
-# TC11: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC11: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = #
 def test_payLoan_11(monkeypatch, capsys):
     inputs = iter(["1", "#"])
@@ -849,7 +841,7 @@ def test_payLoan_11(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Repayment failed: invalid input, please try again." in captured.out
 
-# TC12: existing_loan = 1, balance = 1000, loan_remaining = 1100
+# TC12: existing_loans = 1, balance = 1000, loan_remaining = 1100
 #       option = 1, repayment = None
 def test_payLoan_12(monkeypatch, capsys):
     inputs = iter(["1", ""])
@@ -860,7 +852,7 @@ def test_payLoan_12(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Repayment failed: invalid input, please try again." in captured.out
 
-# TC13: existing_loan = 2, balance = 1000, 
+# TC13: existing_loans = 2, balance = 1000, 
 #       loan1: loan_remaining = 1100, loan2: loan_remaining = 1000
 #       option = 2, repayment = 1000
 def test_payLoan_13(monkeypatch, capsys):
@@ -874,7 +866,7 @@ def test_payLoan_13(monkeypatch, capsys):
             captured = capsys.readouterr()
             assert "Your repayment has been successfully processed!" in captured.out
 
-# TC14: existing_loan = 3, balance = 1000, 
+# TC14: existing_loans = 3, balance = 1000, 
 #       loan1: loan_remaining = 1100, loan2: loan_remaining = 1000, loan3: loan_remaining = 1000
 #       option = 4, repayment = 1000
 def test_payLoan_14(monkeypatch, capsys):
@@ -886,7 +878,7 @@ def test_payLoan_14(monkeypatch, capsys):
             captured = capsys.readouterr()
             assert "Invalid option, please try again." in captured.out
 
-# TC15: existing_loan = 2, balance = 1000, 
+# TC15: existing_loans = 2, balance = 1000, 
 #       loan1: loan_remaining = 1100, loan2: loan_remaining = 1000
 #       option = 3, repayment = 1000
 def test_payLoan_15(monkeypatch, capsys):
