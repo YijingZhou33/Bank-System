@@ -251,11 +251,11 @@ TODO: Test Suite 4, see PROJ
 #
 #----------------------------------------------------------------
 
-# expired_loan = 1
+# expired_loan = 0
 def test_client_1(monkeypatch, capsys):
     inputs = iter(["1", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    monkeypatch.setattr('main_test.checkLoans', lambda _: 1)
+    monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
     monkeypatch.setattr('main_test.deposit', lambda _: print("deposit(username)"))
 
     sql_results = [[10],[100000],[10],[100000]]
@@ -263,7 +263,7 @@ def test_client_1(monkeypatch, capsys):
         mocksql.execute().fetchone.side_effect = sql_results
         client("test")
         captured = capsys.readouterr()
-        assert ("Account is locked now, please pay off the loan first." in captured.out and "deposit(username)" in captured.out)
+        assert ("Account is locked now, please pay off the loan first." not in captured.out and "deposit(username)" in captured.out)
 
 # expired_loan = 0
 def test_client_2(monkeypatch, capsys):
@@ -336,22 +336,7 @@ def test_client_6(monkeypatch, capsys):
 
 # expired_loan = 0
 def test_client_7(monkeypatch, capsys):
-    inputs = iter(["greedisgood", "6"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
-
-    sql_results = [[10],[100000],[10],[100000], []]
-    with patch('main_test.c') as mocksql:
-        mocksql.execute().fetchone.side_effect = sql_results
-        with patch('main_test.conn') as mockcommit:
-            mockcommit.commit.return_value = []
-            a = client("test")
-            captured = capsys.readouterr()
-            assert ("Account is locked now, please pay off the loan first." not in captured.out and a == None)
-
-# expired_loan = 0
-def test_client_8(monkeypatch, capsys):
-    inputs = iter(["7", "6"])
+    inputs = iter(["123", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
 
@@ -360,8 +345,80 @@ def test_client_8(monkeypatch, capsys):
         mocksql.execute().fetchone.side_effect = sql_results
         client("test")
         captured = capsys.readouterr()
-        assert "Invalid option, please try again." in captured.out
+        assert ("Account is locked now, please pay off the loan first." not in captured.out and "Invalid option, please try again." in captured.out)
 
+# expired_loan = 0
+def test_client_8(monkeypatch, capsys):
+    inputs = iter(["", "6"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
+
+    sql_results = [[10],[100000],[10],[100000]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        client("test")
+        captured = capsys.readouterr()
+        assert ("Account is locked now, please pay off the loan first." not in captured.out and "Invalid option, please try again." in captured.out)
+
+# expired_loan = 0
+# len(exist_loans) = 3
+def test_client_9(monkeypatch, capsys):
+    inputs = iter(["3", "6"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
+    sql_results = [[49],[100000],[1000],[49],[100000]]
+
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        mocksql.execute().fetchall.return_value = [[50], [60], [70]]
+        client("test")
+        captured = capsys.readouterr()
+        assert ("Account is locked now, please pay off the loan first." not in captured.out and "You have already reached limitation of total loan amount (3)." in captured.out)
+
+# expired_loan = 1
+def test_client_10(monkeypatch, capsys):
+    inputs = iter(["3", "6"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr('main_test.checkLoans', lambda _: 1)
+
+    sql_results = [[50],[100000],[1000], [50],[100000]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        mocksql.execute().fetchall.return_value = [[50]]
+        client("test")
+        captured = capsys.readouterr()
+        assert ("Account is locked now, please pay off the loan first." in captured.out and "You have loan(s) overdue." in captured.out)
+
+# expired_loan = 0
+# len(exist_loans) = 0
+def test_client_11(monkeypatch, capsys):
+    inputs = iter(["4", "6"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
+
+    sql_results = [[10],[100000],[10],[100000]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        mocksql.execute().fetchall.return_value = []
+        client("test")
+        captured = capsys.readouterr()
+        assert ("Account is locked now, please pay off the loan first." not in captured.out and "You don't have any loan." in captured.out)
+
+# expired_loan = 0
+# len(exist_loans) = 1
+# balance = 0
+def test_client_12(monkeypatch, capsys):
+    inputs = iter(["4", "6"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
+
+    sql_results = [[10],[0],[10],[0]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        mocksql.execute().fetchall.return_value = [["1", 10000, 11000, 63, 75]]
+        client("test")
+        captured = capsys.readouterr()
+        assert ("Account is locked now, please pay off the loan first." not in captured.out and "Your balance is 0, please make a deposit first!" in captured.out)
 
 #----------------------------------------------------------------
 #
