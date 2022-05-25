@@ -197,11 +197,11 @@ def test_login_5(monkeypatch, capsys):
 # TC06: len(username) = 15
 #       username = qwertyuiopasdfg, password = h
 def test_login_6(monkeypatch, capsys):
-    inputs = iter(["test", "h"])
+    inputs = iter(["qwertyuiopasdfg", "h"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.client', lambda _: print("client(username)"))
     with patch('main_test.c') as mocksql:
-        mocksql.execute().fetchone.return_value = ["r", "r"]
+        mocksql.execute().fetchone.return_value = ["qwertyuiopasdfg", "h"]
         login()
         captured = capsys.readouterr()
         assert captured.out == "client(username)\n"
@@ -213,7 +213,7 @@ def test_login_7(monkeypatch, capsys):
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.client', lambda _: print("client(username)"))
     with patch('main_test.c') as mocksql:
-        mocksql.execute().fetchone.return_value = ["r", "r"]
+        mocksql.execute().fetchone.return_value = ["qwertyuiopasdfgh", "h"]
         login()
         captured = capsys.readouterr()
         assert captured.out == "client(username)\n"
@@ -329,8 +329,23 @@ def test_client_6(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert a == None
 
-# TC07: option = 123, overdue_loans = 0
+# TC07: option = "greedisgood", overdue_loans = 0 --> easter egg
 def test_client_7(monkeypatch, capsys):
+    inputs = iter(["greedisgood", "6"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
+
+    sql_results = [[10],[100000],[10],[100000], []]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            a = client("test")
+            captured = capsys.readouterr()
+            assert ("Account is locked now, please pay off the loan first." not in captured.out and a == None)
+
+# TC08: option = 123, overdue_loans = 0
+def test_client_8(monkeypatch, capsys):
     inputs = iter(["123", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
@@ -342,8 +357,8 @@ def test_client_7(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "Invalid option, please try again." in captured.out)
 
-# TC08: option = "", overdue_loans = 0
-def test_client_8(monkeypatch, capsys):
+# TC09: option = "", overdue_loans = 0
+def test_client_9(monkeypatch, capsys):
     inputs = iter(["", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
@@ -355,8 +370,8 @@ def test_client_8(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "Invalid option, please try again." in captured.out)
 
-# TC09: option = 3, existing_loans = 3, overdue_loans = 0
-def test_client_9(monkeypatch, capsys):
+# TC10: option = 3, existing_loans = 3, overdue_loans = 0
+def test_client_10(monkeypatch, capsys):
     inputs = iter(["3", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
@@ -369,8 +384,8 @@ def test_client_9(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "You have already reached limitation of total loan amount (3)." in captured.out)
 
-# TC10: option = 3, existing_loans = 1, overdue_loans = 1
-def test_client_10(monkeypatch, capsys):
+# TC11: option = 3, existing_loans = 1, overdue_loans = 1
+def test_client_11(monkeypatch, capsys):
     inputs = iter(["3", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.checkLoans', lambda _: 1)
@@ -383,8 +398,8 @@ def test_client_10(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." in captured.out and "You have loan(s) overdue." in captured.out)
 
-# TC11: option = 4, existing_loans = 0
-def test_client_11(monkeypatch, capsys):
+# TC12: option = 4, existing_loans = 0
+def test_client_12(monkeypatch, capsys):
     inputs = iter(["4", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
@@ -397,7 +412,7 @@ def test_client_11(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "You don't have any loan." in captured.out)
 
-# TC12: option = 4, balance = 0, existing_loans = 1, overdue_loans = 0
+# TC13: option = 4, balance = 0, existing_loans = 1, overdue_loans = 0
 def test_client_12(monkeypatch, capsys):
     inputs = iter(["4", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -866,22 +881,10 @@ def test_payLoan_13(monkeypatch, capsys):
             captured = capsys.readouterr()
             assert "Your repayment has been successfully processed!" in captured.out
 
-# TC14: existing_loans = 3, balance = 1000, 
-#       loan1: loan_remaining = 1100, loan2: loan_remaining = 1000, loan3: loan_remaining = 1000
-#       option = 4, repayment = 1000
-def test_payLoan_14(monkeypatch, capsys):
-    inputs = iter(["4"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    with patch('main_test.c') as mocksql:
-            mocksql.execute().fetchall.return_value = [["1", 100000, 110000, 63, 75], ["2", 100000, 100000, 63, 75], ["3", 100000, 100000, 63, 75]]
-            payLoan("test", 100000)
-            captured = capsys.readouterr()
-            assert "Invalid option, please try again." in captured.out
-
-# TC15: existing_loans = 2, balance = 1000, 
+# TC14: existing_loans = 2, balance = 1000, 
 #       loan1: loan_remaining = 1100, loan2: loan_remaining = 1000
 #       option = 3, repayment = 1000
-def test_payLoan_15(monkeypatch, capsys):
+def test_payLoan_14(monkeypatch, capsys):
     inputs = iter(["3"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     with patch('main_test.c') as mocksql:
@@ -889,6 +892,32 @@ def test_payLoan_15(monkeypatch, capsys):
         payLoan("test", 100000)
         captured = capsys.readouterr()
         assert "Invalid option, please try again." in captured.out
+
+# TC15: existing_loans = 3, balance = 1000, 
+#       loan1: loan_remaining = 1100, loan2: loan_remaining = 1000, loan3: loan_remaining = 1000
+#       option = 3, repayment = 1000
+def test_payLoan_15(monkeypatch, capsys):
+    inputs = iter(["3", "1000"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            mocksql.execute().fetchall.return_value = [["1", 100000, 110000, 63, 75], ["2", 100000, 100000, 63, 75], ["3", 100000, 100000, 63, 75]]
+            payLoan("test", 100000)
+            captured = capsys.readouterr()
+            assert "Your repayment has been successfully processed!" in captured.out
+
+# TC16: existing_loans = 3, balance = 1000, 
+#       loan1: loan_remaining = 1100, loan2: loan_remaining = 1000, loan3: loan_remaining = 1000
+#       option = 4, repayment = 1000
+def test_payLoan_16(monkeypatch, capsys):
+    inputs = iter(["4"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+            mocksql.execute().fetchall.return_value = [["1", 100000, 110000, 63, 75], ["2", 100000, 100000, 63, 75], ["3", 100000, 100000, 63, 75]]
+            payLoan("test", 100000)
+            captured = capsys.readouterr()
+            assert "Invalid option, please try again." in captured.out
 
 
 #----------------------------------------------------------------
@@ -1020,9 +1049,15 @@ def test_admin_4(monkeypatch, capsys):
 #
 #  Test Suite 12: FR-11: Change Interest Rates
 #  
-#       total_assets = 10100000.00, min_loanrate = 9.50, 
-#       max_loanrate = 10.00, min_depositrate = 4.50, 
-#       max_loanrate = 5.00
+#       TC01-TC11:
+#           total_assets = 10100000.00, min_loanrate = 9.50, 
+#           max_loanrate = 10.00, min_depositrate = 4.50, 
+#           max_loanrate = 5.00
+#
+#       TC12-TC19:
+#           total_assets = 9999000.00, min_loanrate = 10.00, 
+#           max_loanrate = 10.01, min_depositrate = 5.00, 
+#           max_loanrate = 5.01
 #----------------------------------------------------------------
 
 # TC01: new_loanrate = 9.50, new_depositrate = 4.50
@@ -1147,6 +1182,92 @@ def test_changeRates_11(monkeypatch, capsys):
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     with patch('main_test.c') as mocksql:
         mocksql.execute().fetchone.return_value = ["1010000000", "1000", "500"]
+        changeRates()
+        captured = capsys.readouterr()
+        assert "Loan rate change failed: Invalid input." in captured.out and "Deposit rate change failed: Invalid input." in captured.out
+
+# TC12: new_loanrate = 10.01, new_depositrate = 5.01
+def test_changeRates_12(monkeypatch, capsys):
+    inputs = iter(["10.01", "5.01"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
+            changeRates()
+            captured = capsys.readouterr()
+        assert "Loan rate has been successfully changed!" in captured.out and "Deposit rate has been successfully changed!" in captured.out
+
+# TC13: new_loanrate = 9.99, new_depositrate = 4.99
+def test_changeRates_13(monkeypatch, capsys):
+    inputs = iter(["9.99", "4.99"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
+        changeRates()
+        captured = capsys.readouterr()
+        assert "Loan rate change failed: Invalid input." in captured.out and "Deposit rate change failed: Invalid input." in captured.out
+
+# TC14: new_loanrate = 10.02, new_depositrate = 5.02
+def test_changeRates_14(monkeypatch, capsys):
+    inputs = iter(["10.02", "5.02"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
+        changeRates()
+        captured = capsys.readouterr()
+        assert "Loan rate change failed: Invalid input." in captured.out and "Deposit rate change failed: Invalid input." in captured.out
+
+# TC15: new_loanrate = 10.00, new_depositrate = 4.99
+def test_changeRates_15(monkeypatch, capsys):
+    inputs = iter(["10.00", "4.99"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
+            changeRates()
+            captured = capsys.readouterr()
+            assert "Loan rate has been successfully changed!" in captured.out and "Deposit rate change failed: Invalid input." in captured.out
+
+# TC16: new_loanrate = 9.99, new_depositrate = 5.00
+def test_changeRates_16(monkeypatch, capsys):
+    inputs = iter(["9.99", "5.00"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
+            changeRates()
+            captured = capsys.readouterr()
+            assert "Loan rate change failed: Invalid input." in captured.out and "Deposit rate has been successfully changed!" in captured.out
+
+# TC17: new_loanrate = 10.099, new_depositrate = 5.009
+def test_changeRates_17(monkeypatch, capsys):
+    inputs = iter(["10.099", "5.009"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
+        changeRates()
+        captured = capsys.readouterr()
+        assert "Loan rate change failed: Invalid input." in captured.out and "Deposit rate change failed: Invalid input." in captured.out
+
+# TC18: new_loanrate = #, new_depositrate = #
+def test_changeRates_18(monkeypatch, capsys):
+    inputs = iter(["#", "#"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
+        changeRates()
+        captured = capsys.readouterr()
+        assert "Loan rate change failed: Invalid input." in captured.out and "Deposit rate change failed: Invalid input." in captured.out
+
+# TC19: new_loanrate = None, new_depositrate = None
+def test_changeRates_19(monkeypatch, capsys):
+    inputs = iter(["", ""])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.return_value = ["999900000", "1000", "500"]
         changeRates()
         captured = capsys.readouterr()
         assert "Loan rate change failed: Invalid input." in captured.out and "Deposit rate change failed: Invalid input." in captured.out
