@@ -439,78 +439,106 @@ def test_deposit_7(monkeypatch, capsys):
     assert ("Deposit failed: invalid input, please try again." in captured.out)
 
 
-
-
-
-# 0 < deposit <= 1000000
-# deposit = 200000
-def test_deposit_4(monkeypatch, capsys):
-    inputs = iter(["2000"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    sql_results = [[1],[1]]
-    with patch('main_test.c') as mocksql:
-        mocksql.execute.side_effect = sql_results
-        with patch('main_test.conn') as mockcommit:
-            mockcommit.commit.return_value = []
-            deposit("test")
-            captured = capsys.readouterr()
-            assert ("Your deposit has been successfully processed!" in captured.out)
-
-
 #----------------------------------------------------------------
 #
 #  Test Suite 6: FR-6: Make Withdrawal
 #
 #----------------------------------------------------------------
 
-# withdraw = None
-def test_withdraw_1(monkeypatch, capsys):
-    inputs = iter([""])
+# username: qwertyuiopasdfg
+# total assets = 5000
+def test_withdraw_deposit_5000(monkeypatch, capsys):
+    inputs = iter(["5000"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    withdraw("test", 10000)
-    captured = capsys.readouterr()
-    assert ("Withdraw failed: invalid input, please try again." in captured.out)
+    sql_results = [[1],[1]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute.side_effect = sql_results
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            deposit("qwertyuiopasdfg")
+            captured = capsys.readouterr()
+            assert ("Your deposit has been successfully processed!" in captured.out)
 
 # withdraw = 0
-def test_withdraw_2(monkeypatch, capsys):
+def test_withdraw_1(monkeypatch, capsys):
     inputs = iter(["0"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    withdraw("test", 10000)
+    withdraw("qwertyuiopasdfg", 0)
     captured = capsys.readouterr()
     assert ("Withdraw failed: invalid input, please try again." in captured.out)
 
-# withdraw = 200001
-def test_withdraw_3(monkeypatch, capsys):
-    inputs = iter(["2000.01"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    withdraw("test", 10000)
-    captured = capsys.readouterr()
-    assert ("Withdraw failed: invalid input, please try again." in captured.out)
-
-# withdraw = 10001
-# balance = 10000
-def test_withdraw_4(monkeypatch, capsys):
-    inputs = iter(["100.01"])
-    balance = 10000
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    withdraw("test", balance)
-    captured = capsys.readouterr()
-    assert ("Withdraw failed: invalid input, please try again." in captured.out)
-
-# 100000 < withdraw <= 1000000
-# withdraw = 100000
-def test_withdraw_5(monkeypatch, capsys):
-    inputs = iter(["1000"])
+# 0.01 <= withdraw <= 2000
+# withdraw = 0.01, balance = 5000
+def test_withdraw_2(monkeypatch, capsys):
+    inputs = iter(["0.01"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     sql_results = [[1],[1]]
     with patch('main_test.c') as mocksql:
         mocksql.execute().fetchone.side_effect = sql_results
         with patch('main_test.conn') as mockcommit:
             mockcommit.commit.return_value = []
-            balance = 100000
-            withdraw("test", balance)
+            balance = 500000
+            withdraw("qwertyuiopasdfg", balance)
             captured = capsys.readouterr()
             assert ("Your withdrawl has been successfully processed!" in captured.out)
+
+# 0.01 <= withdraw <= 2000
+# withdraw = 1999.99, balance = 4999.99
+def test_withdraw_3(monkeypatch, capsys):
+    inputs = iter(["1999.99"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    sql_results = [[1],[1]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            balance = 499999
+            withdraw("qwertyuiopasdfg", balance)
+            captured = capsys.readouterr()
+            assert ("Your withdrawl has been successfully processed!" in captured.out)
+
+# 0.01 <= withdraw <= 2000
+# withdraw = 2000, balance = 3000
+def test_withdraw_4(monkeypatch, capsys):
+    inputs = iter(["2000"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    sql_results = [[1],[1]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute().fetchone.side_effect = sql_results
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            balance = 300000
+            withdraw("qwertyuiopasdfg", balance)
+            captured = capsys.readouterr()
+            assert ("Your withdrawl has been successfully processed!" in captured.out)
+
+# 0.01 <= withdraw <= 2000
+# withdraw = 2000.01, balance = 1000
+def test_withdraw_5(monkeypatch, capsys):
+    inputs = iter(["2000.01"])
+    balance = 1000000
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    withdraw("test", balance)
+    captured = capsys.readouterr()
+    assert ("Withdraw failed: invalid input, please try again." in captured.out)
+
+# withdraw = #, balance = 1000
+def test_withdraw_1(monkeypatch, capsys):
+    inputs = iter(["#"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    withdraw("qwertyuiopasdfg", 10000)
+    captured = capsys.readouterr()
+    assert ("Withdraw failed: invalid input, please try again." in captured.out)
+
+
+# withdraw = NULL, balance = 1000
+def test_withdraw_1(monkeypatch, capsys):
+    inputs = iter([""])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    withdraw("qwertyuiopasdfg", 10000)
+    captured = capsys.readouterr()
+    assert ("Withdraw failed: invalid input, please try again." in captured.out)
+
 
 # Initialize A Loan
 
