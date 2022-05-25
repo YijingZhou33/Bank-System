@@ -364,29 +364,83 @@ def test_client_8(monkeypatch, capsys):
 #
 #----------------------------------------------------------------
 
-# deposit = None
-def test_deposit_1(monkeypatch, capsys):
-    inputs = iter([""])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    deposit("test")
-    captured = capsys.readouterr()
-    assert ("Deposit failed: invalid input, please try again." in captured.out)
-
 # deposit = 0
-def test_deposit_2(monkeypatch, capsys):
+def test_deposit_1(monkeypatch, capsys):
     inputs = iter(["0"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     deposit("test")
     captured = capsys.readouterr()
     assert ("Deposit failed: invalid input, please try again." in captured.out)
 
-# deposit = 1000001
+# 0 < deposit <= 1000000
+# deposit = 0.01
+def test_deposit_2(monkeypatch, capsys):
+    inputs = iter(["0.01"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    sql_results = [[1],[1]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute.side_effect = sql_results
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            deposit("r")
+            captured = capsys.readouterr()
+            assert ("Your deposit has been successfully processed!" in captured.out)
+
+# 0 < deposit <= 1000000
+# deposit = 9999.99
 def test_deposit_3(monkeypatch, capsys):
+    inputs = iter(["9999.99"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    sql_results = [[1],[1]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute.side_effect = sql_results
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            deposit("r")
+            captured = capsys.readouterr()
+            assert ("Your deposit has been successfully processed!" in captured.out)
+
+# 0 < deposit <= 1000000
+# deposit = 9999.99
+def test_deposit_4(monkeypatch, capsys):
+    inputs = iter(["10000"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    sql_results = [[1],[1]]
+    with patch('main_test.c') as mocksql:
+        mocksql.execute.side_effect = sql_results
+        with patch('main_test.conn') as mockcommit:
+            mockcommit.commit.return_value = []
+            deposit("r")
+            captured = capsys.readouterr()
+            assert ("Your deposit has been successfully processed!" in captured.out)
+
+# deposit = 1000001
+def test_deposit_5(monkeypatch, capsys):
     inputs = iter(["10000.01"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-    deposit("test")
+    deposit("r")
     captured = capsys.readouterr()
     assert ("Deposit failed: invalid input, please try again." in captured.out)
+
+# deposit = #
+def test_deposit_6(monkeypatch, capsys):
+    inputs = iter(["#"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    deposit("r")
+    captured = capsys.readouterr()
+    assert ("Deposit failed: invalid input, please try again." in captured.out)
+
+# deposit = None
+def test_deposit_7(monkeypatch, capsys):
+    inputs = iter([""])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    deposit("r")
+    captured = capsys.readouterr()
+    assert ("Deposit failed: invalid input, please try again." in captured.out)
+
+
+
+
 
 # 0 < deposit <= 1000000
 # deposit = 200000
