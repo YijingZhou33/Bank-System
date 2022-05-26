@@ -227,7 +227,7 @@ def test_login_8(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert captured.out == "\nUsername too long, please try again.\n"
 
-# TC08: len(password) = 0
+# TC09: len(password) = 0
 #       username = l, password = ""
 def test_login_9(monkeypatch, capsys):
     inputs = iter(["k", ""])
@@ -413,7 +413,7 @@ def test_client_12(monkeypatch, capsys):
         assert ("Account is locked now, please pay off the loan first." not in captured.out and "You don't have any loan." in captured.out)
 
 # TC13: option = 4, balance = 0, existing_loans = 1, overdue_loans = 0
-def test_client_12(monkeypatch, capsys):
+def test_client_13(monkeypatch, capsys):
     inputs = iter(["4", "6"])
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
     monkeypatch.setattr('main_test.checkLoans', lambda _: 0)
@@ -948,7 +948,7 @@ def test_pass1Month_2(monkeypatch, capsys):
             mockcommit.commit.return_value = []
             pass1Month()
 
-# TC02: balance = 1000, loan_remaining = 1001
+# TC03: balance = 1000, loan_remaining = 1001
 def test_pass1Month_3(monkeypatch, capsys):
     with patch('main_test.c') as mocksql:
         mocksql.execute().fetchall.return_value = [[1, "test", "1001"]]
